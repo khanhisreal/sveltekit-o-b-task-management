@@ -1,11 +1,20 @@
 <script lang="ts">
 	import ComponentLayout from '../../lib/client/components/layout/component-layout.svelte';
 	import { userSettings } from '$lib/client/stores/store';
+	import { FILTER_OPTIONS, type FilterOption } from '$lib/client/interfaces/Task';
 
-	function toggleTheme() {
+	function handleTheme() {
 		userSettings.update((current) => ({
 			...current,
 			isDarkMode: !current.isDarkMode
+		}));
+	}
+
+	function handleDefaultFilter(event: Event) {
+		const selectedValue = (event.target as HTMLSelectElement).value as FilterOption;
+		userSettings.update((current) => ({
+			...current,
+			filterDefaultValue: selectedValue
 		}));
 	}
 </script>
@@ -18,13 +27,18 @@
 	<div class="toggle-theme">
 		<span>Toggle theme</span>
 		<label class="switch">
-			<input type="checkbox" on:change={toggleTheme} />
+			<input type="checkbox" on:change={handleTheme} bind:checked={$userSettings.isDarkMode} />
 			<span class="slider"></span>
 		</label>
 	</div>
 
 	<div class="default-filter">
 		<span>Set default filter</span>
+		<select on:change={handleDefaultFilter} bind:value={$userSettings.filterDefaultValue}>
+			{#each FILTER_OPTIONS as option}
+				<option value={option}>{option}</option>
+			{/each}
+		</select>
 	</div>
 </ComponentLayout>
 
@@ -82,5 +96,30 @@
 
 	input:checked + .slider:before {
 		transform: translateX(24px);
+	}
+
+	.default-filter {
+		display: flex;
+		align-items: center;
+		gap: 1rem;
+	}
+
+	select {
+		padding: 6px 12px;
+		border: 1px solid #ccc;
+		border-radius: 6px;
+		background-color: var(--bg-color);
+		color: var(--text-color);
+		font-size: 1rem;
+		cursor: pointer;
+		transition: all 0.3s ease;
+	}
+
+	select:hover {
+		border-color: var(--accent-color);
+	}
+
+	select:focus {
+		outline: none;
 	}
 </style>

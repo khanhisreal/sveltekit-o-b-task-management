@@ -1,3 +1,6 @@
+export const FILTER_OPTIONS = ['All', 'Active', 'Completed'] as const;
+export type FilterOption = (typeof FILTER_OPTIONS)[number];
+
 export interface Task {
 	id: string;
 	title: string;
@@ -8,5 +11,5 @@ export interface Task {
 
 export interface UserSettings {
 	isDarkMode: boolean;
-	filterDefaultValue: 'All' | 'Completed' | 'Active';
+	filterDefaultValue: FilterOption;
 }
