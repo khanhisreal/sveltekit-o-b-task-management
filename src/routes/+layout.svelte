@@ -5,25 +5,35 @@
 	import { userSettings } from '$lib/client/stores/store';
 
 	let { children } = $props();
+	let ready = $state(false);
+
+	$effect(() => {
+		const unsubscribe = userSettings.subscribe(() => {
+			ready = true;
+		});
+		return unsubscribe;
+	});
 </script>
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
-<div class="layout" class:dark={$userSettings.isDarkMode}>
-	<header>
-		<NavigationBar />
-	</header>
+{#if ready}
+	<div class="layout" class:dark={$userSettings.isDarkMode}>
+		<header>
+			<NavigationBar />
+		</header>
 
-	<section>
-		{@render children()}
-	</section>
+		<section>
+			{@render children()}
+		</section>
 
-	<footer>
-		<Footer />
-	</footer>
-</div>
+		<footer>
+			<Footer />
+		</footer>
+	</div>
+{/if}
 
 <style>
 	.layout {

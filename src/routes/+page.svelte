@@ -2,20 +2,32 @@
 	import TableActions from '../lib/client/components/table-actions.svelte';
 	import Modal from '../lib/client/components/modal.svelte';
 	import ComponentLayout from '../lib/client/components/layout/component-layout.svelte';
+	import { userSettings } from '$lib/client/stores/store';
+	import { onMount } from 'svelte';
 
 	//comes from +page.server.ts
 	let { data } = $props();
-
 	let tasks = $state([...data.tasks]);
 	let page = data.page ?? 1;
 	let limit = data.limit ?? 5;
 	let totalPages = data.totalPages ?? 1;
-	let status = data.status ?? 'All';
+
+	let status = $state(data.status ?? 'All');
 	let search = data.search ?? '';
 
 	let showAddForm = $state(false);
 	let isAddTask = $state(false);
 	let taskId = $state();
+
+	onMount(() => {
+		const unsubscribe = userSettings.subscribe((settings) => {
+			if (status === 'All' && settings.filterDefaultValue !== 'All') {
+				status = settings.filterDefaultValue;
+				handleFilter(settings.filterDefaultValue);
+			}
+		});
+		return unsubscribe; //clean up when component unmounts
+	});
 
 	function updateQuery(params: Record<string, string | number | undefined>) {
 		const url = new URL(window.location.href);

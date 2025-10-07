@@ -1,8 +1,15 @@
 <script lang="ts">
+	import { userSettings } from '$lib/client/stores/store';
+	import type { FilterOption, UserSettings } from '../interfaces/Task';
+
 	let { onAdd, onSearch, onFilter, status, search } = $props();
 
 	let searchQuery = $state(search ?? '');
 	let selectedStatus = $state(status ?? 'All');
+
+	const unsubscribe = userSettings.subscribe((settings: UserSettings) => {
+		selectedStatus = settings.filterDefaultValue ?? 'All';
+	});
 
 	function handleSearch() {
 		onSearch(searchQuery);
@@ -10,9 +17,16 @@
 
 	function handleFilter(event: Event) {
 		const target = event.target as HTMLSelectElement;
-		selectedStatus = target.value;
-		onFilter(selectedStatus);
+		const value = target.value;
+		selectedStatus = value;
+		userSettings.update((current: UserSettings) => ({
+			...current,
+			filterDefaultValue: value as FilterOption
+		}));
+		onFilter(value);
 	}
+
+	$effect(() => () => unsubscribe());
 </script>
 
 <div class="container">
