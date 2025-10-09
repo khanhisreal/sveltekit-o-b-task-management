@@ -1,10 +1,9 @@
 <script>
 	import { page } from '$app/stores';
-	import { userSettings } from '$lib/client/stores/store';
 	$: currentPath = $page.url.pathname;
 </script>
 
-<div class="container" class:dark={$userSettings.isDarkMode}>
+<div class="container">
 	<a href="/" class:active={currentPath === '/'}>
 		<i class="fa-solid fa-house"></i> Homepage
 	</a>

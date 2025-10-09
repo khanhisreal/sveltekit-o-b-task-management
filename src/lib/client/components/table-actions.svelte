@@ -85,6 +85,7 @@
 		flex: 1;
 		min-width: 180px;
 		padding: 6px 10px;
+		color: var(--text-color);
 		border: 1px solid var(--muted-color);
 		background-color: var(--bg-color);
 		border-radius: 5px;
@@ -107,6 +108,7 @@
 		padding: 6px 10px;
 		border: 1px solid var(--muted-color);
 		background-color: var(--bg-color);
+		color: var(--text-color);
 		border-radius: 5px;
 		transition:
 			background-color 0.3s ease,
@@ -114,8 +116,11 @@
 			border-color 0.3s ease;
 	}
 
-	select:focus {
+	select:hover {
 		border-color: var(--accent-color);
+	}
+
+	select:focus {
 		outline: none;
 	}
 
