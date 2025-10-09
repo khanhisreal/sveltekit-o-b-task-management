@@ -12,10 +12,10 @@ function createUserSettings() {
 	}
 
 	const store = writable<UserSettings>(startValue);
+	
 	store.subscribe((val) => {
 		if (typeof localStorage !== 'undefined') {
 			localStorage.setItem(LOCAL_KEY, JSON.stringify(val));
-			document.documentElement.dataset.theme = val.isDarkMode ? 'dark' : 'light';
 		}
 	});
 

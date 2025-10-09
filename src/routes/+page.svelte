@@ -6,7 +6,8 @@
 	import { onMount } from 'svelte';
 
 	//comes from +page.server.ts
-	let { data } = $props();
+	let { data, form } = $props();
+
 	let tasks = $state([...data.tasks]);
 	let page = data.page ?? 1;
 	let limit = data.limit ?? 5;
@@ -81,7 +82,7 @@
 	/>
 
 	{#if showAddForm}
-		<Modal onAdd={handleAdd} {isAddTask} {taskId} {tasks} />
+		<Modal onAdd={handleAdd} {isAddTask} {taskId} {tasks} {form} />
 	{/if}
 
 	<div class="table-container" id="table">
