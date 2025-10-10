@@ -1,14 +1,13 @@
 <script lang="ts">
 	import type { Task } from '../interfaces/Task';
 	import { fade } from 'svelte/transition';
+	import { enhance } from '$app/forms';
 
 	let { onAdd, isAddTask, taskId, tasks, form } = $props();
 
 	let task = !isAddTask && taskId ? tasks.find((t: Task) => t.id === taskId) : null;
 
 	let title = isAddTask ? 'Add Task' : 'Edit Task';
-
-	const today = new Date().toISOString().split('T')[0];
 </script>
 
 <div class="modal" transition:fade={{ duration: 200 }}>
@@ -19,7 +18,22 @@
 			<button onclick={onAdd}><i class="fa-solid fa-xmark"></i></button>
 		</div>
 		<div class="form-content">
-			<form method="POST" action={isAddTask ? '?/add' : '?/update'}>
+			<form
+				method="POST"
+				action={isAddTask ? '?/add' : '?/update'}
+				use:enhance={() => {
+					return async ({ result, update }) => {
+						if (result.type === 'success') {
+							if (result.type === 'success') {
+								onAdd();
+								window.location.reload();
+							}
+						} else if (result.type === 'failure') {
+							await update();
+						}
+					};
+				}}
+			>
 				{#if !isAddTask}
 					<input type="hidden" name="id" value={taskId} />
 				{/if}
@@ -36,20 +50,13 @@
 				</div>
 				<div>
 					<label for="description">Description:</label>
-					<textarea name="description" id="description" placeholder="Add description" rows="3">
-						{task?.description ?? ''}
-					</textarea>
+					<textarea name="description" id="description" placeholder="Add description" rows="3"
+						>{task?.description ?? ''}</textarea
+					>
 				</div>
 				<div>
 					<label for="due_date">Due date:</label>
-					<input
-						type="date"
-						name="due_date"
-						id="due_date"
-						value={task?.due_date ?? ''}
-						min={today}
-						required
-					/>
+					<input type="date" name="due_date" id="due_date" value={task?.due_date ?? ''} required />
 				</div>
 				{#if !isAddTask && task}
 					<div>
@@ -59,6 +66,9 @@
 							<option value="Completed">Completed</option>
 						</select>
 					</div>
+				{/if}
+				{#if form?.errorMsg}
+					<p class="error">{form.errorMsg}</p>
 				{/if}
 				<div class="action-buttons">
 					<button type="button" onclick={onAdd} class="cancel">Cancel</button>
@@ -262,5 +272,9 @@
 
 	.action-buttons .confirm:active {
 		transform: scale(0.95);
+	}
+
+	.error {
+		color: #ff4545;
 	}
 </style>
