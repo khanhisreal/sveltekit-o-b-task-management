@@ -1,22 +1,7 @@
 <script lang="ts">
 	import ComponentLayout from '../../lib/client/components/layout/component-layout.svelte';
 	import { userSettings } from '$lib/client/stores/store';
-	import { FILTER_OPTIONS, type FilterOption } from '$lib/client/interfaces/Task';
-
-	function handleTheme() {
-		userSettings.update((current) => ({
-			...current,
-			isDarkMode: !current.isDarkMode
-		}));
-	}
-
-	function handleDefaultFilter(event: Event) {
-		const selectedValue = (event.target as HTMLSelectElement).value as FilterOption;
-		userSettings.update((current) => ({
-			...current,
-			filterDefaultValue: selectedValue
-		}));
-	}
+	import { FILTER_OPTIONS } from '$lib/client/interfaces/Task';
 </script>
 
 <ComponentLayout
@@ -27,17 +12,27 @@
 	<div class="toggle-theme">
 		<span>Toggle theme</span>
 		<label class="switch">
-			<input type="checkbox" on:change={handleTheme} bind:checked={$userSettings.isDarkMode} />
+			<input type="checkbox" bind:checked={$userSettings.isDarkMode} />
 			<span class="slider"></span>
 		</label>
 	</div>
 
 	<div class="default-filter">
 		<span>Set default filter</span>
-		<select on:change={handleDefaultFilter} bind:value={$userSettings.filterDefaultValue}>
+		<select bind:value={$userSettings.filterDefaultValue}>
 			{#each FILTER_OPTIONS as option}
 				<option value={option}>{option}</option>
 			{/each}
+		</select>
+	</div>
+
+	<div class="page-limit">
+		<span>Set page limit</span>
+		<select bind:value={$userSettings.pageLimitDefaultValue}>
+			<option value={'5'}>5</option>
+			<option value={'10'}>10</option>
+			<option value={'15'}>15</option>
+			<option value={'20'}>20</option>
 		</select>
 	</div>
 </ComponentLayout>
@@ -45,12 +40,9 @@
 <style>
 	div {
 		margin: 20px 0px;
-	}
-
-	.toggle-theme {
+		gap: 1rem;
 		display: flex;
 		align-items: center;
-		gap: 1rem;
 	}
 
 	.switch {
@@ -96,12 +88,6 @@
 
 	input:checked + .slider:before {
 		transform: translateX(24px);
-	}
-
-	.default-filter {
-		display: flex;
-		align-items: center;
-		gap: 1rem;
 	}
 
 	select {

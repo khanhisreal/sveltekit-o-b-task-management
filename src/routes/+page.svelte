@@ -21,13 +21,35 @@
 	let taskId = $state();
 
 	onMount(() => {
-		const unsubscribe = userSettings.subscribe((settings) => {
-			if (status === 'All' && settings.filterDefaultValue !== 'All') {
-				status = settings.filterDefaultValue;
-				handleFilter(settings.filterDefaultValue);
-			}
-		});
-		return unsubscribe; //clean up when component unmounts
+		const currentUrl = new URL(window.location.href);
+		const urlStatus = currentUrl.searchParams.get('status');
+		const urlLimit = currentUrl.searchParams.get('limit');
+
+		const storedSettings = JSON.parse(localStorage.getItem('userSettings') || '{}');
+
+		let needsUpdate = false;
+
+		if (
+			!urlStatus &&
+			storedSettings.filterDefaultValue &&
+			storedSettings.filterDefaultValue !== 'All'
+		) {
+			currentUrl.searchParams.set('status', storedSettings.filterDefaultValue);
+			needsUpdate = true;
+		}
+
+		if (
+			!urlLimit &&
+			storedSettings.pageLimitDefaultValue &&
+			storedSettings.pageLimitDefaultValue !== '5'
+		) {
+			currentUrl.searchParams.set('limit', storedSettings.pageLimitDefaultValue);
+			needsUpdate = true;
+		}
+
+		if (needsUpdate) {
+			window.location.href = currentUrl.toString();
+		}
 	});
 
 	function updateQuery(params: Record<string, string | number | undefined>) {

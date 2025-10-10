@@ -12,4 +12,5 @@ export interface Task {
 export interface UserSettings {
 	isDarkMode: boolean;
 	filterDefaultValue: FilterOption;
+	pageLimitDefaultValue: string;
 }

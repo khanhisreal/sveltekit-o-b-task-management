@@ -76,24 +76,18 @@ export const actions: Actions = {
 		const due_date = String(form.get('due_date') ?? '').trim();
 
 		if (!title) {
-			console.log('Error title null');
-
 			return fail(422, {
 				data: title,
 				errorMsg: 'Title cannot be empty.'
 			});
 		}
 		if (title.length > 100) {
-			console.log('Error title length');
-
 			return fail(422, {
 				data: title,
 				errorMsg: 'Title length cannot be greater than 100 characters.'
 			});
 		}
 		if (description.length > 400) {
-			console.log('Error description length');
-
 			return fail(422, {
 				data: title,
 				errorMsg: 'Description length cannot be greater than 400 characters.'
@@ -126,24 +120,18 @@ export const actions: Actions = {
 		const status = String(form.get('status') ?? 'Active').trim();
 
 		if (!title) {
-			console.log('Error title null');
-
 			return fail(422, {
 				data: title,
 				errorMsg: 'Title cannot be empty.'
 			});
 		}
 		if (title.length > 100) {
-			console.log('Error title length');
-
 			return fail(422, {
 				data: title,
 				errorMsg: 'Title length cannot be greater than 100 characters.'
 			});
 		}
 		if (description.length > 400) {
-			console.log('Error description length');
-
 			return fail(422, {
 				data: title,
 				errorMsg: 'Description length cannot be greater than 400 characters.'
