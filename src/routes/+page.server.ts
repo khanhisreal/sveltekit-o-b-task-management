@@ -2,9 +2,8 @@
  * +page.server.ts = server-side controller for the page
  */
 import { API_PATHS } from '$lib/server/constants/api-paths';
-import type { Actions, PageServerLoad } from './$types';
 import { fail } from '@sveltejs/kit';
-import { validateTaskData } from '$lib/server/utils/validate-task';
+import type { Actions, PageServerLoad } from './$types';
 
 async function getPaginatedTasks(page = 1, limit = 5, status = 'All', search = '') {
 	const params = new URLSearchParams({
@@ -76,33 +75,46 @@ export const actions: Actions = {
 		const description = String(form.get('description') ?? '').trim();
 		const due_date = String(form.get('due_date') ?? '').trim();
 
-		try {
-			validateTaskData({ title, description, due_date });
+		if (!title) {
+			console.log('Error title null');
 
-			await fetch(API_PATHS.TASKS, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					title,
-					description,
-					status: 'Active',
-					due_date
-				})
+			return fail(422, {
+				data: title,
+				errorMsg: 'Title cannot be empty.'
 			});
-
-			const page = Number(url.searchParams.get('page') ?? '1');
-			const limit = Number(url.searchParams.get('limit') ?? '5');
-			const statusURL = url.searchParams.get('status') ?? undefined;
-			return getPaginatedTasks(page, limit, statusURL);
-		} catch (error) {
-			if (error instanceof Response) return error;
-
-			if (error instanceof Error) {
-				return fail(400, { error: error.message });
-			}
-
-			return fail(500, { error: 'Unexpected server error' });
 		}
+		if (title.length > 100) {
+			console.log('Error title length');
+
+			return fail(422, {
+				data: title,
+				errorMsg: 'Title length cannot be greater than 100 characters.'
+			});
+		}
+		if (description.length > 400) {
+			console.log('Error description length');
+
+			return fail(422, {
+				data: title,
+				errorMsg: 'Description length cannot be greater than 400 characters.'
+			});
+		}
+
+		await fetch(API_PATHS.TASKS, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				title,
+				description,
+				status: 'Active',
+				due_date
+			})
+		});
+
+		const page = Number(url.searchParams.get('page') ?? '1');
+		const limit = Number(url.searchParams.get('limit') ?? '5');
+		const statusURL = url.searchParams.get('status') ?? undefined;
+		return getPaginatedTasks(page, limit, statusURL);
 	},
 
 	update: async ({ request, url }) => {
@@ -113,32 +125,45 @@ export const actions: Actions = {
 		const due_date = String(form.get('due_date') ?? '').trim();
 		const status = String(form.get('status') ?? 'Active').trim();
 
-		try {
-			validateTaskData({ title, description, due_date });
+		if (!title) {
+			console.log('Error title null');
 
-			await fetch(`${API_PATHS.TASKS}/${id}`, {
-				method: 'PUT',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					title,
-					description,
-					status: status === 'Completed' ? 'Completed' : 'Active',
-					due_date
-				})
+			return fail(422, {
+				data: title,
+				errorMsg: 'Title cannot be empty.'
 			});
-
-			const page = Number(url.searchParams.get('page') ?? '1');
-			const limit = Number(url.searchParams.get('limit') ?? '5');
-			const statusURL = url.searchParams.get('status') ?? undefined;
-			return getPaginatedTasks(page, limit, statusURL);
-		} catch (error) {
-			if (error instanceof Response) return error;
-
-			if (error instanceof Error) {
-				return fail(400, { error: error.message });
-			}
-
-			return fail(500, { error: 'Unexpected server error' });
 		}
+		if (title.length > 100) {
+			console.log('Error title length');
+
+			return fail(422, {
+				data: title,
+				errorMsg: 'Title length cannot be greater than 100 characters.'
+			});
+		}
+		if (description.length > 400) {
+			console.log('Error description length');
+
+			return fail(422, {
+				data: title,
+				errorMsg: 'Description length cannot be greater than 400 characters.'
+			});
+		}
+
+		await fetch(`${API_PATHS.TASKS}/${id}`, {
+			method: 'PUT',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({
+				title,
+				description,
+				status: status === 'Completed' ? 'Completed' : 'Active',
+				due_date
+			})
+		});
+
+		const page = Number(url.searchParams.get('page') ?? '1');
+		const limit = Number(url.searchParams.get('limit') ?? '5');
+		const statusURL = url.searchParams.get('status') ?? undefined;
+		return getPaginatedTasks(page, limit, statusURL);
 	}
 };
