@@ -2,11 +2,12 @@
 	import TableActions from '../lib/client/components/table-actions.svelte';
 	import Modal from '../lib/client/components/modal.svelte';
 	import ComponentLayout from '../lib/client/components/layout/component-layout.svelte';
-	import { userSettings } from '$lib/client/stores/store';
 	import { onMount } from 'svelte';
 
 	//comes from +page.server.ts
 	let { data, form } = $props();
+
+	let errorMsg = $state(form?.errorMsg);
 
 	let tasks = $state([...data.tasks]);
 	let page = data.page ?? 1;
@@ -88,6 +89,14 @@
 		if (n < 1 || n > totalPages) return;
 		updateQuery({ page: n, limit });
 	}
+
+	function handleSetErrorMessage(msg?: string) {
+		errorMsg = msg;
+	}
+
+	function handleResetErrorMessage() {
+		errorMsg = undefined;
+	}
 </script>
 
 <ComponentLayout
@@ -104,7 +113,15 @@
 	/>
 
 	{#if showAddForm}
-		<Modal onAdd={handleAdd} {isAddTask} {taskId} {tasks} {form} />
+		<Modal
+			onAdd={handleAdd}
+			onResetMessage={handleResetErrorMessage}
+			onSetMessage={handleSetErrorMessage}
+			{isAddTask}
+			{taskId}
+			{tasks}
+			{errorMsg}
+		/>
 	{/if}
 
 	<div class="table-container" id="table">

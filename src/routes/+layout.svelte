@@ -52,4 +52,8 @@
 	section {
 		padding: 10px;
 	}
+
+	footer {
+		margin-top: 100px;
+	}
 </style>

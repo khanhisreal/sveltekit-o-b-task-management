@@ -87,10 +87,10 @@ export const actions: Actions = {
 				errorMsg: 'Title length cannot be greater than 100 characters.'
 			});
 		}
-		if (description.length > 400) {
+		if (description.length > 200) {
 			return fail(422, {
 				data: title,
-				errorMsg: 'Description length cannot be greater than 400 characters.'
+				errorMsg: 'Description length cannot be greater than 200 characters.'
 			});
 		}
 
@@ -131,10 +131,10 @@ export const actions: Actions = {
 				errorMsg: 'Title length cannot be greater than 100 characters.'
 			});
 		}
-		if (description.length > 400) {
+		if (description.length > 200) {
 			return fail(422, {
 				data: title,
-				errorMsg: 'Description length cannot be greater than 400 characters.'
+				errorMsg: 'Description length cannot be greater than 200 characters.'
 			});
 		}
 

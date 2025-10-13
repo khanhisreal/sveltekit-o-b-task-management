@@ -3,7 +3,7 @@
 	import { fade } from 'svelte/transition';
 	import { enhance } from '$app/forms';
 
-	let { onAdd, isAddTask, taskId, tasks, form } = $props();
+	let { onAdd, onResetMessage, onSetMessage, isAddTask, taskId, tasks, errorMsg } = $props();
 
 	let task = !isAddTask && taskId ? tasks.find((t: Task) => t.id === taskId) : null;
 
@@ -15,7 +15,15 @@
 		<div class="form-header">
 			<h3>{title}</h3>
 			<!-- svelte-ignore a11y_consider_explicit_label -->
-			<button onclick={onAdd}><i class="fa-solid fa-xmark"></i></button>
+			<button
+				type="button"
+				onclick={() => {
+					onResetMessage();
+					onAdd();
+				}}
+			>
+				<i class="fa-solid fa-xmark"></i>
+			</button>
 		</div>
 		<div class="form-content">
 			<form
@@ -24,12 +32,11 @@
 				use:enhance={() => {
 					return async ({ result, update }) => {
 						if (result.type === 'success') {
-							if (result.type === 'success') {
-								onAdd();
-								window.location.reload();
-							}
+							onAdd();
+							window.location.reload();
 						} else if (result.type === 'failure') {
 							await update();
+							onSetMessage(result.data?.errorMsg);
 						}
 					};
 				}}
@@ -67,8 +74,8 @@
 						</select>
 					</div>
 				{/if}
-				{#if form?.errorMsg}
-					<p class="error">{form.errorMsg}</p>
+				{#if errorMsg}
+					<p class="error">{errorMsg}</p>
 				{/if}
 				<div class="action-buttons">
 					<button type="button" onclick={onAdd} class="cancel">Cancel</button>
