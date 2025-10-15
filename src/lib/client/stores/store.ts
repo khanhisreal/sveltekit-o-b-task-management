@@ -1,5 +1,5 @@
 import { writable } from 'svelte/store';
-import type { UserSettings } from '../interfaces/Task';
+import type { UserSettings } from '../interfaces/interface';
 
 const LOCAL_KEY = 'userSettings';
 

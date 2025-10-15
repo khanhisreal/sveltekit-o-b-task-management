@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { Task } from '../interfaces/Task';
+	import type { Task } from '../interfaces/interface';
 	import { fade } from 'svelte/transition';
 	import { enhance } from '$app/forms';
 

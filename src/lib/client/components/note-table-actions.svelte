@@ -1,36 +1,17 @@
-<script lang="ts">
-	let { onAdd, onSearch, onFilter, status, search } = $props();
-
-	let searchQuery = $state(search ?? '');
-	let selectedStatus = $state(status ?? 'All');
-
-	function handleSearch() {
-		onSearch(searchQuery);
-	}
-
-	function handleFilter(event: Event) {
-		const target = event.target as HTMLSelectElement;
-		const value = target.value;
-		onFilter(value);
-	}
+<script>
+	const PAGE_OPTIONS = ['1', '2', '3', '4', '5'];
 </script>
 
+<!-- svelte-ignore a11y_consider_explicit_label -->
 <div class="container">
-	<button onclick={onAdd}>
-		<i class="fa-solid fa-plus"></i> <span>Add Task</span>
-	</button>
-
-	<input type="text" placeholder="Search tasks by id, title, description, status, or due date" bind:value={searchQuery} />
-
-	<button onclick={handleSearch}
-		><i class="fa-solid fa-magnifying-glass"></i> <span>Search</span>
-	</button>
-
-	<select bind:value={selectedStatus} onchange={handleFilter}>
-		<option value="All">All</option>
-		<option value="Active">Active</option>
-		<option value="Completed">Completed</option>
+	<button><i class="fa-solid fa-plus"></i> <span>Add a note</span></button>
+	<input type="text" placeholder="Search by id, note, date created, or due date" />
+	<select>
+		{#each PAGE_OPTIONS as option}
+			<option value={`${option}`}>{option}</option>
+		{/each}
 	</select>
+	<button><i class="fa-solid fa-magnifying-glass"></i> <span>Search</span></button>
 </div>
 
 <style>
