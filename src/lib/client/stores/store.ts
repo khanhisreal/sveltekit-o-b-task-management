@@ -7,7 +7,7 @@ function createUserSettings() {
 	let startValue: UserSettings = {
 		isDarkMode: false,
 		filterDefaultValue: 'All',
-		pageLimitDefaultValue: "5"
+		pageLimitDefaultValue: '5'
 	};
 
 	if (typeof localStorage !== 'undefined') {
@@ -18,7 +18,8 @@ function createUserSettings() {
 	const store = writable<UserSettings>(startValue);
 
 	store.subscribe((val) => {
-		if (typeof localStorage !== 'undefined') {
+		if (typeof document !== 'undefined') {
+			document.cookie = `userSettings=${JSON.stringify(val)}; path=/; max-age=31536000`;
 			localStorage.setItem(LOCAL_KEY, JSON.stringify(val));
 		}
 	});

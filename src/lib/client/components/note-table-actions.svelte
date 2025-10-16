@@ -1,31 +1,42 @@
 <script>
 	const PAGE_OPTIONS = ['1', '2', '3', '4', '5'];
+	const { handleShowModal, handleAddNote } = $props();
 </script>
 
 <!-- svelte-ignore a11y_consider_explicit_label -->
 <div class="container">
-	<button><i class="fa-solid fa-plus"></i> <span>Add a note</span></button>
-	<input type="text" placeholder="Search by id, note, date created, or due date" />
-	<select>
+	<button
+		onclick={() => {
+			handleShowModal();
+			handleAddNote();
+		}}
+		><i class="fa-solid fa-plus"></i>
+	</button>
+	<input type="text" placeholder="Start typing here..." />
+	<button><i class="fa-solid fa-magnifying-glass"></i> </button>
+	<label for="page-limit">Records per page:</label>
+	<select name="page-limit">
 		{#each PAGE_OPTIONS as option}
 			<option value={`${option}`}>{option}</option>
 		{/each}
 	</select>
-	<button><i class="fa-solid fa-magnifying-glass"></i> <span>Search</span></button>
 </div>
 
 <style>
 	.container {
 		margin-top: 10px;
 		display: flex;
-		justify-content: space-between;
 		align-items: center;
-		gap: 10px;
+		gap: 8px;
 		flex-wrap: wrap;
+		padding: 15px;
+		border: 1px solid #ddd;
+		border-radius: 8px;
+		width: fit-content;
 	}
 
 	button {
-		padding: 6px 12px;
+		padding: 9px 12px;
 		border-radius: 5px;
 		border: none;
 		cursor: pointer;
@@ -46,8 +57,8 @@
 	}
 
 	input[type='text'] {
-		flex: 1;
-		min-width: 180px;
+		width: auto;
+		min-width: 220px;
 		padding: 6px 10px;
 		color: var(--text-color);
 		border: 1px solid var(--muted-color);
@@ -86,11 +97,5 @@
 
 	select:focus {
 		outline: none;
-	}
-
-	@media screen and (max-width: 534px) {
-		button span {
-			display: none;
-		}
 	}
 </style>

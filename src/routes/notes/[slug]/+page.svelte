@@ -1,56 +1,62 @@
 <script lang="ts">
 	import ComponentLayout from '$lib/client/components/layout/component-layout.svelte';
 	import NoteTableActions from '$lib/client/components/note-table-actions.svelte';
+	import NoteModal from '$lib/client/components/note-modal.svelte';
 	import type { Note } from '$lib/client/interfaces/interface';
 
-	const { data } = $props();
 	const LOCAL_STORAGE_KEY = 'lastVisitedQuery';
+	const { data } = $props();
+
+	console.log(data);
+
+	const task = data.task;
+	const notes: Note[] | string | undefined = data.notes;
+
+	let toggleModal = $state(false);
+	let isAddNote = $state(true);
+
+	function handleShowModal() {
+		toggleModal = true;
+	}
+
+	function handleHideModal() {
+		toggleModal = false;
+	}
+
+	function handleAddNote() {
+		isAddNote = true;
+	}
+
+	function handleEditNote() {
+		isAddNote = false;
+	}
 
 	const backURL = localStorage.getItem(LOCAL_STORAGE_KEY) ?? '/';
-
-	const notes: Note[] = [
-		{
-			id: '1',
-			task_id: data.id,
-			content: 'Remember to include diagrams in slides.',
-			created_at: '2025-10-11',
-			due_date: '2025-10-20'
-		},
-		{
-			id: '2',
-			task_id: data.id,
-			content: 'Add team contributions section.',
-			created_at: '2025-10-12',
-			due_date: '2025-10-20'
-		},
-		{
-			id: '3',
-			task_id: data.id,
-			content: 'Finalize before Friday meeting.',
-			created_at: '2025-10-13',
-			due_date: '2025-10-20'
-		}
-	];
 </script>
 
 <ComponentLayout
-	title={`Task: ${data.title}`}
-	description={`Here, you can leave some notes for this task`}
+	title={`Task: ${task!.title}`}
+	description={`Here, you can leave some notes for dedicated to this task`}
 	sectionTitle={'Task details'}
 >
 	<ul>
-		<li><span>Id:</span> {data.id}</li>
-		<li><span>Description:</span> {data.description}</li>
-		<li><span>Status:</span> {data.status}</li>
-		<li><span>Due date:</span> {data.due_date}</li>
+		<li><span>Id:</span> {task!.id}</li>
+		<li><span>Description:</span> {task!.description}</li>
+		<li><span>Status:</span> {task!.status}</li>
+		<li><span>Due date:</span> {task!.due_date}</li>
 	</ul>
 
-	<hr class="rounded" />
+	<a href={backURL} class="back-button"
+		><i class="fa-solid fa-arrow-left"></i> <span>Comeback to task list</span></a
+	>
 
-	<h3 class="notes-header">Notes</h3>
-	<NoteTableActions />
+	<NoteTableActions {handleShowModal} {handleAddNote} />
 
-	{#if notes.length > 0}
+	{#if toggleModal}
+		<NoteModal {handleHideModal} {isAddNote} taskId={task?.id} />
+	{/if}
+
+	{#if Array.isArray(notes) && notes!.length > 0}
 		<div class="table-container">
 			<table>
 				<thead>
@@ -72,7 +78,13 @@
 							<td class="actions-cell">
 								<div class="actions">
 									<!-- svelte-ignore a11y_consider_explicit_label -->
-									<button class="edit">
+									<button
+										class="edit"
+										onclick={() => {
+											handleShowModal();
+											handleEditNote();
+										}}
+									>
 										<i class="fa-solid fa-pencil"></i>
 									</button>
 									<form
@@ -106,35 +118,15 @@
 	{:else}
 		<p class="fallback">No notes yet for this task. You can start by adding one.</p>
 	{/if}
-
-	<a href={backURL} class="back-button"
-		><i class="fa-solid fa-arrow-left"></i> <span>Back to the last page</span></a
-	>
 </ComponentLayout>
 
 <style>
 	ul {
-		margin: 5px 0px 0px 0px;
-	}
-
-	hr {
-		margin: 20px 0px;
-	}
-
-	hr.rounded {
-		border-top: 1px solid var(--muted-color);
-		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-		border-radius: 5px;
+		margin: 5px 0px 15px 0px;
 	}
 
 	ul span {
 		font-weight: 600;
-	}
-
-	.notes-header {
-		font-size: 1.2rem;
-		font-weight: 600;
-		margin-bottom: 10px;
 	}
 
 	.table-container {
@@ -234,14 +226,19 @@
 	} */
 
 	.fallback {
-		margin-top: 10px;
+		margin-top: 20px;
+		text-align: center;
 		font-style: italic;
 		color: var(--muted-color);
+		font-size: 1rem;
+		background: var(--muted-bg);
+		padding: 50px;
+		border-radius: 8px;
 	}
 
 	.back-button {
 		display: inline-block;
-		margin-top: 20px;
+		margin-bottom: 10px;
 		padding: 5px 10px;
 		border-radius: 5px;
 		text-decoration: none;

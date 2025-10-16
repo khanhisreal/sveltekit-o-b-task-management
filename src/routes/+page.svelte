@@ -2,20 +2,18 @@
 	import TableActions from '../lib/client/components/table-actions.svelte';
 	import Modal from '../lib/client/components/modal.svelte';
 	import ComponentLayout from '../lib/client/components/layout/component-layout.svelte';
-	import { onMount } from 'svelte';
 
 	//comes from +page.server.ts
 	let { data, form } = $props();
 
 	let errorMsg = $state(form?.errorMsg);
 
-	let tasks = $state([...data.tasks]);
-	let page = data.page ?? 1;
-	let limit = data.limit ?? 5;
-	let totalPages = data.totalPages ?? 1;
-
-	let status = $state(data.status ?? 'All');
-	let search = data.search ?? '';
+	let tasks = $derived(data.tasks);
+	let page = $derived(data.page ?? 1);
+	let limit = $derived(data.limit ?? 5);
+	let totalPages = $derived(data.totalPages ?? 1);
+	let status = $derived(data.status ?? 'All');
+	let search = $derived(data.search ?? '');
 
 	let showAddForm = $state(false);
 	let isAddTask = $state(false);
@@ -23,42 +21,14 @@
 
 	const LOCAL_STORAGE_KEY = 'lastVisitedQuery';
 
-	onMount(() => {
-		const currentUrl = new URL(window.location.href);
-		const urlStatus = currentUrl.searchParams.get('status');
-		const urlLimit = currentUrl.searchParams.get('limit');
-
-		const storedSettings = JSON.parse(localStorage.getItem('userSettings') || '{}');
-
-		let needsUpdate = false;
-
-		if (
-			!urlStatus &&
-			storedSettings.filterDefaultValue &&
-			storedSettings.filterDefaultValue !== 'All'
-		) {
-			currentUrl.searchParams.set('status', storedSettings.filterDefaultValue);
-			needsUpdate = true;
-		}
-
-		if (
-			!urlLimit &&
-			storedSettings.pageLimitDefaultValue &&
-			storedSettings.pageLimitDefaultValue !== '5'
-		) {
-			currentUrl.searchParams.set('limit', storedSettings.pageLimitDefaultValue);
-			needsUpdate = true;
-		}
-
-		if (needsUpdate) {
-			window.location.href = currentUrl.toString();
-		}
-	});
-
 	function updateQuery(params: Record<string, string | number | undefined>) {
 		const url = new URL(window.location.href);
 		for (const key in params) {
-			if (params[key] === undefined || params[key] === '' || params[key] === 'All') {
+			if (params[key] === undefined || params[key] === '') {
+				url.searchParams.delete(key);
+			} else if (key === 'status' && params[key] === 'All') {
+				url.searchParams.set(key, 'All');
+			} else if (params[key] === 'All') {
 				url.searchParams.delete(key);
 			} else {
 				url.searchParams.set(key, String(params[key]));
@@ -332,9 +302,8 @@
 		color: var(--muted-color);
 		font-size: 1rem;
 		background: var(--muted-bg);
-		padding: 12px;
+		padding: 50px;
 		border-radius: 8px;
-		border: 1px dashed var(--muted-color);
 	}
 
 	@media (max-width: 768px) {

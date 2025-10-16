@@ -2,7 +2,12 @@
 	let { onAdd, onSearch, onFilter, status, search } = $props();
 
 	let searchQuery = $state(search ?? '');
+
 	let selectedStatus = $state(status ?? 'All');
+
+	$effect(() => {
+		selectedStatus = status;
+	});
 
 	function handleSearch() {
 		onSearch(searchQuery);
@@ -20,7 +25,11 @@
 		<i class="fa-solid fa-plus"></i> <span>Add Task</span>
 	</button>
 
-	<input type="text" placeholder="Search tasks by id, title, description, status, or due date" bind:value={searchQuery} />
+	<input
+		type="text"
+		placeholder="Search tasks by id, title, description, status, or due date"
+		bind:value={searchQuery}
+	/>
 
 	<button onclick={handleSearch}
 		><i class="fa-solid fa-magnifying-glass"></i> <span>Search</span>
