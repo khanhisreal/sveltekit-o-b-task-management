@@ -9,6 +9,14 @@ export interface Task {
 	due_date: string;
 }
 
+export interface Note {
+	id: string;
+	task_id: string;
+	content: string;
+	created_at: string;
+	due_date: string;
+}
+
 export interface UserSettings {
 	isDarkMode: boolean;
 	filterDefaultValue: FilterOption;

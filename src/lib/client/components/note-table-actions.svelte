@@ -1,44 +1,24 @@
-<script lang="ts">
-	let { onAdd, onSearch, onFilter, status, search } = $props();
-
-	let searchQuery = $state(search ?? '');
-
-	let selectedStatus = $state(status ?? 'All');
-
-	$effect(() => {
-		selectedStatus = status;
-	});
-
-	function handleSearch() {
-		onSearch(searchQuery);
-	}
-
-	function handleFilter(event: Event) {
-		const target = event.target as HTMLSelectElement;
-		const value = target.value;
-		onFilter(value);
-	}
+<script>
+	const PAGE_OPTIONS = ['1', '2', '3', '4', '5'];
+	const { handleShowModal, handleAddNote } = $props();
 </script>
 
+<!-- svelte-ignore a11y_consider_explicit_label -->
 <div class="container">
-	<button onclick={onAdd}>
-		<i class="fa-solid fa-plus"></i> <span>Add Task</span>
+	<button
+		onclick={() => {
+			handleShowModal();
+			handleAddNote();
+		}}
+		><i class="fa-solid fa-plus"></i>
 	</button>
-
-	<input
-		type="text"
-		placeholder="Search tasks by id, title, description, status, or due date"
-		bind:value={searchQuery}
-	/>
-
-	<button onclick={handleSearch}
-		><i class="fa-solid fa-magnifying-glass"></i> <span>Search</span>
-	</button>
-
-	<select bind:value={selectedStatus} onchange={handleFilter}>
-		<option value="All">All</option>
-		<option value="Active">Active</option>
-		<option value="Completed">Completed</option>
+	<input type="text" placeholder="Start typing here..." />
+	<button><i class="fa-solid fa-magnifying-glass"></i> </button>
+	<label for="page-limit">Records per page:</label>
+	<select name="page-limit">
+		{#each PAGE_OPTIONS as option}
+			<option value={`${option}`}>{option}</option>
+		{/each}
 	</select>
 </div>
 
@@ -46,14 +26,17 @@
 	.container {
 		margin-top: 10px;
 		display: flex;
-		justify-content: space-between;
 		align-items: center;
-		gap: 10px;
+		gap: 8px;
 		flex-wrap: wrap;
+		padding: 15px;
+		border: 1px solid #ddd;
+		border-radius: 8px;
+		width: fit-content;
 	}
 
 	button {
-		padding: 6px 12px;
+		padding: 9px 12px;
 		border-radius: 5px;
 		border: none;
 		cursor: pointer;
@@ -74,8 +57,8 @@
 	}
 
 	input[type='text'] {
-		flex: 1;
-		min-width: 180px;
+		width: auto;
+		min-width: 220px;
 		padding: 6px 10px;
 		color: var(--text-color);
 		border: 1px solid var(--muted-color);
@@ -114,11 +97,5 @@
 
 	select:focus {
 		outline: none;
-	}
-
-	@media screen and (max-width: 534px) {
-		button span {
-			display: none;
-		}
 	}
 </style>

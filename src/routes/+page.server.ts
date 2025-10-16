@@ -37,22 +37,22 @@ async function getPaginatedTasks(page = 1, limit = 5, status = 'All', search = '
 	return { tasks, totalPages };
 }
 
-export const load: PageServerLoad = async ({ url }) => {
+export const load: PageServerLoad = async ({ url, cookies }) => {
+	const userSettingsCookie = cookies.get('userSettings');
+	const storedSettings = userSettingsCookie ? JSON.parse(userSettingsCookie) : {};
+
 	const page = Number(url.searchParams.get('page') ?? '1');
-	const limit = Number(url.searchParams.get('limit') ?? '5');
-	const status = url.searchParams.get('status') ?? 'All';
+	const limit = Number(
+		url.searchParams.get('limit') ?? storedSettings.pageLimitDefaultValue ?? '5'
+	);
+	const status = url.searchParams.has('status')
+		? url.searchParams.get('status')
+		: (storedSettings.filterDefaultValue ?? 'All');
 	const search = url.searchParams.get('search') ?? '';
 
 	const { tasks, totalPages } = await getPaginatedTasks(page, limit, status, search);
 
-	return {
-		tasks,
-		page,
-		limit,
-		totalPages,
-		search,
-		status
-	};
+	return { tasks, page, limit, totalPages, search, status };
 };
 
 //the server also runs any form actions

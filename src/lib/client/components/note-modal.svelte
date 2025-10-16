@@ -1,84 +1,56 @@
-<script lang="ts">
-	import type { Task } from '../interfaces/interface';
+<script>
 	import { fade } from 'svelte/transition';
-	import { enhance } from '$app/forms';
 
-	let { onAdd, onResetMessage, onSetMessage, isAddTask, taskId, tasks, errorMsg } = $props();
+	const { handleHideModal, isAddNote, taskId } = $props();
 
-	let task = !isAddTask && taskId ? tasks.find((t: Task) => t.id === taskId) : null;
+	console.log(taskId);
 
-	let title = isAddTask ? 'Add Task' : 'Edit Task';
+	//get current date
+	const today = new Date();
+
+	const year = today.getFullYear();
+	const month = String(today.getMonth() + 1).padStart(2, '0');
+	const day = String(today.getDate()).padStart(2, '0');
+
+	const current_date = `${year}-${month}-${day}`;
 </script>
 
 <div class="modal" transition:fade={{ duration: 200 }}>
 	<div class="container">
 		<div class="form-header">
-			<h3>{title}</h3>
+			<h3>
+				{#if isAddNote}
+					Add a note
+				{:else if !isAddNote}
+					Edit a note
+				{/if}
+			</h3>
 			<!-- svelte-ignore a11y_consider_explicit_label -->
-			<button
-				type="button"
-				onclick={() => {
-					onResetMessage();
-					onAdd();
-				}}
-			>
+			<button type="button" onclick={handleHideModal}>
 				<i class="fa-solid fa-xmark"></i>
 			</button>
 		</div>
 		<div class="form-content">
-			<form
-				method="POST"
-				action={isAddTask ? '?/add' : '?/update'}
-				use:enhance={() => {
-					return async ({ result, update }) => {
-						if (result.type === 'success') {
-							onAdd();
-							window.location.reload();
-						} else if (result.type === 'failure') {
-							await update();
-							onSetMessage(result.data?.errorMsg);
-						}
-					};
-				}}
-			>
-				{#if !isAddTask}
-					<input type="hidden" name="id" value={taskId} />
-				{/if}
+			<form method="POST" action={isAddNote ? '?/add' : '?/update'}>
+				<input hidden type="text" name="task_id" value={taskId} />
+				<input hidden type="date" name="created_at" value={current_date} />
 				<div>
-					<label for="name">Name:<span>*</span></label>
-					<input
-						type="text"
-						name="name"
-						id="name"
-						placeholder="Add task name"
-						value={task?.title ?? ''}
+					<label for="content">Content:<span>*</span></label>
+					<textarea
+						name="content"
+						id="content"
+						placeholder="Add content for this note..."
+						rows="2"
 						required
-					/>
-				</div>
-				<div>
-					<label for="description">Description:</label>
-					<textarea name="description" id="description" placeholder="Add description" rows="3"
-						>{task?.description ?? ''}</textarea
-					>
+					></textarea>
 				</div>
 				<div>
 					<label for="due_date">Due date:</label>
-					<input type="date" name="due_date" id="due_date" value={task?.due_date ?? ''} required />
+					<input type="date" name="due_date" id="due_date" min={current_date} required />
 				</div>
-				{#if !isAddTask && task}
-					<div>
-						<label for="status">Set status:</label>
-						<select name="status" id="status" value={task?.status ?? 'Active'}>
-							<option value="Active">Active</option>
-							<option value="Completed">Completed</option>
-						</select>
-					</div>
-				{/if}
-				{#if errorMsg}
-					<p class="error">{errorMsg}</p>
-				{/if}
+
 				<div class="action-buttons">
-					<button type="button" onclick={onAdd} class="cancel">Cancel</button>
+					<button type="button" class="cancel" onclick={handleHideModal}>Cancel</button>
 					<button type="submit" class="confirm">Confirm</button>
 				</div>
 			</form>
@@ -147,8 +119,7 @@
 		color: red;
 	}
 
-	.form-content form input,
-	.form-content form select {
+	.form-content form input {
 		flex: 1;
 		padding: 6px 8px;
 		color: var(--text-color);
@@ -170,8 +141,7 @@
 		outline: none;
 	}
 
-	input[type='date'],
-	select {
+	input[type='date'] {
 		appearance: none;
 		-webkit-appearance: none;
 		-moz-appearance: none;
@@ -185,8 +155,7 @@
 		cursor: pointer;
 	}
 
-	input[type='date']:focus,
-	select:focus {
+	input[type='date']:focus {
 		border-color: var(--accent-color);
 		outline: none;
 	}
@@ -194,14 +163,6 @@
 	.form-content form div {
 		display: flex;
 		align-items: center;
-	}
-
-	select {
-		background-image: url("data:image/svg+xml;utf8,<svg fill='gray' height='12' width='12' xmlns='http://www.w3.org/2000/svg'><path d='M2 4l4 4 4-4z'/></svg>");
-		background-repeat: no-repeat;
-		background-position: right 10px center;
-		background-size: 12px;
-		padding-right: 30px;
 	}
 
 	input[type='date']::-webkit-calendar-picker-indicator {

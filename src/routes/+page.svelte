@@ -2,61 +2,33 @@
 	import TableActions from '../lib/client/components/table-actions.svelte';
 	import Modal from '../lib/client/components/modal.svelte';
 	import ComponentLayout from '../lib/client/components/layout/component-layout.svelte';
-	import { onMount } from 'svelte';
 
 	//comes from +page.server.ts
 	let { data, form } = $props();
 
 	let errorMsg = $state(form?.errorMsg);
 
-	let tasks = $state([...data.tasks]);
-	let page = data.page ?? 1;
-	let limit = data.limit ?? 5;
-	let totalPages = data.totalPages ?? 1;
-
-	let status = $state(data.status ?? 'All');
-	let search = data.search ?? '';
+	let tasks = $derived(data.tasks);
+	let page = $derived(data.page ?? 1);
+	let limit = $derived(data.limit ?? 5);
+	let totalPages = $derived(data.totalPages ?? 1);
+	let status = $derived(data.status ?? 'All');
+	let search = $derived(data.search ?? '');
 
 	let showAddForm = $state(false);
 	let isAddTask = $state(false);
 	let taskId = $state();
 
-	onMount(() => {
-		const currentUrl = new URL(window.location.href);
-		const urlStatus = currentUrl.searchParams.get('status');
-		const urlLimit = currentUrl.searchParams.get('limit');
-
-		const storedSettings = JSON.parse(localStorage.getItem('userSettings') || '{}');
-
-		let needsUpdate = false;
-
-		if (
-			!urlStatus &&
-			storedSettings.filterDefaultValue &&
-			storedSettings.filterDefaultValue !== 'All'
-		) {
-			currentUrl.searchParams.set('status', storedSettings.filterDefaultValue);
-			needsUpdate = true;
-		}
-
-		if (
-			!urlLimit &&
-			storedSettings.pageLimitDefaultValue &&
-			storedSettings.pageLimitDefaultValue !== '5'
-		) {
-			currentUrl.searchParams.set('limit', storedSettings.pageLimitDefaultValue);
-			needsUpdate = true;
-		}
-
-		if (needsUpdate) {
-			window.location.href = currentUrl.toString();
-		}
-	});
+	const LOCAL_STORAGE_KEY = 'lastVisitedQuery';
 
 	function updateQuery(params: Record<string, string | number | undefined>) {
 		const url = new URL(window.location.href);
 		for (const key in params) {
-			if (params[key] === undefined || params[key] === '' || params[key] === 'All') {
+			if (params[key] === undefined || params[key] === '') {
+				url.searchParams.delete(key);
+			} else if (key === 'status' && params[key] === 'All') {
+				url.searchParams.set(key, 'All');
+			} else if (params[key] === 'All') {
 				url.searchParams.delete(key);
 			} else {
 				url.searchParams.set(key, String(params[key]));
@@ -124,70 +96,85 @@
 		/>
 	{/if}
 
-	<div class="table-container" id="table">
-		<table>
-			<thead>
-				<tr>
-					<th>Title</th>
-					<th>Description</th>
-					<th>Status</th>
-					<th>Due Date</th>
-					<th>Actions</th>
-				</tr>
-			</thead>
-			<tbody>
-				{#each tasks as task}
+	{#if tasks && tasks.length > 0}
+		<div class="table-container" id="table">
+			<table>
+				<thead>
 					<tr>
-						<td>{task.title}</td>
-						<td>{task.description}</td>
-						<td>
-							<button
-								class="status-btn"
-								class:completed={task.status === 'Completed'}
-								class:active={task.status === 'Active'}
-								style="cursor: auto"
-							>
-								{task.status}
-							</button>
-						</td>
-						<td>{task.due_date}</td>
-						<td class="actions-cell">
-							<div class="actions">
-								<!-- svelte-ignore a11y_consider_explicit_label -->
-								<button class="edit" onclick={() => handleEdit(task.id)}>
-									<i class="fa-solid fa-pencil"></i>
-								</button>
-								<form
-									method="POST"
-									action="?/delete"
-									onsubmit={(e) => {
-										if (!confirm('Are you sure you want to delete this task?')) {
-											e.preventDefault();
-										}
+						<th>Title</th>
+						<th>Description</th>
+						<th>Status</th>
+						<th>Due Date</th>
+						<th>Actions</th>
+					</tr>
+				</thead>
+				<tbody>
+					{#each tasks as task}
+						<tr>
+							<td>
+								<a
+									style="font-weight: 600"
+									href={`/notes/${task.id}`}
+									onclick={() => {
+										localStorage.setItem(LOCAL_STORAGE_KEY, window.location.href);
 									}}
 								>
-									<input type="hidden" name="id" value={task.id} />
+									{task.title}
+								</a>
+							</td>
+							<td>{task.description}</td>
+							<td>
+								<button
+									class="status-btn"
+									class:completed={task.status === 'Completed'}
+									class:active={task.status === 'Active'}
+									style="cursor: auto"
+								>
+									{task.status}
+								</button>
+							</td>
+							<td>{task.due_date}</td>
+							<td class="actions-cell">
+								<div class="actions">
 									<!-- svelte-ignore a11y_consider_explicit_label -->
-									<button type="submit" class="delete">
-										<i class="fa-solid fa-trash"></i>
+									<button class="edit" onclick={() => handleEdit(task.id)}>
+										<i class="fa-solid fa-pencil"></i>
 									</button>
-								</form>
-							</div>
-						</td>
-					</tr>
-				{/each}
-			</tbody>
-		</table>
-		<div class="pagination">
-			<button onclick={() => goToPage(page - 1)} disabled={page <= 1}
-				><i class="fa-solid fa-arrow-left"></i> Prev</button
-			>
-			<span>Page {page} / {totalPages}</span>
-			<button onclick={() => goToPage(page + 1)} disabled={page >= totalPages}
-				>Next <i class="fa-solid fa-arrow-right"></i></button
-			>
+									<form
+										method="POST"
+										action="?/delete"
+										onsubmit={(e) => {
+											if (!confirm('Are you sure you want to delete this task?')) {
+												e.preventDefault();
+											}
+										}}
+									>
+										<input type="hidden" name="id" value={task.id} />
+										<!-- svelte-ignore a11y_consider_explicit_label -->
+										<button type="submit" class="delete">
+											<i class="fa-solid fa-trash"></i>
+										</button>
+									</form>
+								</div>
+							</td>
+						</tr>
+					{/each}
+				</tbody>
+			</table>
+
+			<div class="pagination">
+				<button onclick={() => goToPage(page - 1)} disabled={page <= 1}
+					><i class="fa-solid fa-arrow-left"></i> Prev</button
+				>
+				<span>Page {page} / {totalPages}</span>
+				<button onclick={() => goToPage(page + 1)} disabled={page >= totalPages}
+					>Next <i class="fa-solid fa-arrow-right"></i></button
+				>
+			</div>
 		</div>
-	</div>
+	{:else}
+		<p class="fallback">No tasks found. You can start by adding one.</p>
+	{/if}
 </ComponentLayout>
 
 <style>
@@ -278,6 +265,11 @@
 		padding: 4px 8px;
 		border-radius: 4px;
 		margin-right: 5px;
+		transition: 0.2s;
+	}
+
+	.edit:hover {
+		background: #caecf1;
 	}
 
 	.delete {
@@ -285,7 +277,13 @@
 		border: none;
 		padding: 4px 8px;
 		border-radius: 4px;
+		transition: 0.2s;
 	}
+
+	.delete:hover {
+		background: #f6c9cf;
+	}
+
 	.actions-cell {
 		width: 1%;
 		white-space: nowrap;
@@ -295,6 +293,17 @@
 		display: flex;
 		gap: 6px;
 		align-items: center;
+	}
+
+	.fallback {
+		margin-top: 20px;
+		text-align: center;
+		font-style: italic;
+		color: var(--muted-color);
+		font-size: 1rem;
+		background: var(--muted-bg);
+		padding: 50px;
+		border-radius: 8px;
 	}
 
 	@media (max-width: 768px) {

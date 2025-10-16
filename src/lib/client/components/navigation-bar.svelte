@@ -37,16 +37,17 @@
 		margin-right: 5px;
 	}
 
-	a:hover {
+	a.active {
 		color: var(--link-hover-color);
 		background-color: var(--link-hover-bg);
 		cursor: pointer;
 		text-decoration: none;
 	}
 
-	a.active {
-		background-color: gray;
-		color: lightgray;
+	a:hover {
+		color: var(--link-hover-color);
+		background-color: var(--link-hover-bg);
+		cursor: pointer;
 		text-decoration: none;
 	}
 </style>

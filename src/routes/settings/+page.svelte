@@ -1,7 +1,7 @@
 <script lang="ts">
 	import ComponentLayout from '../../lib/client/components/layout/component-layout.svelte';
 	import { userSettings } from '$lib/client/stores/store';
-	import { FILTER_OPTIONS } from '$lib/client/interfaces/Task';
+	import { FILTER_OPTIONS } from '$lib/client/interfaces/interface';
 </script>
 
 <ComponentLayout
