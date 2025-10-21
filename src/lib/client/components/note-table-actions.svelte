@@ -1,21 +1,51 @@
-<script>
+<script lang="ts">
 	const PAGE_OPTIONS = ['1', '2', '3', '4', '5'];
-	const { handleShowModal, handleAddNote } = $props();
+	const { handleAddNote, currentLimit, initialContent = '' } = $props();
+
+	let searchQuery = $state(initialContent);
+	let selectedLimit = $state(String(currentLimit));
+
+	function handleLimitChange(e: Event) {
+		const limit = (e.target as HTMLSelectElement).value;
+		const url = new URL(window.location.href);
+		url.searchParams.set('limit', limit);
+		url.searchParams.set('page', '1');
+		window.location.href = url.toString();
+	}
+
+	function handleSearch(e: Event) {
+		e.preventDefault();
+		const q = searchQuery.trim();
+
+		const url = new URL(window.location.href);
+
+		if (q) {
+			url.searchParams.set('content', q);
+			url.searchParams.set('page', '1');
+		} else {
+			url.searchParams.delete('content');
+			url.searchParams.set('page', '1');
+		}
+		window.location.href = url.toString();
+	}
 </script>
 
 <!-- svelte-ignore a11y_consider_explicit_label -->
 <div class="container">
 	<button
 		onclick={() => {
-			handleShowModal();
 			handleAddNote();
 		}}
 		><i class="fa-solid fa-plus"></i>
 	</button>
-	<input type="text" placeholder="Start typing here..." />
-	<button><i class="fa-solid fa-magnifying-glass"></i> </button>
+
+	<form onsubmit={handleSearch} style="display: flex; gap: 0; align-items: center;">
+		<input type="text" placeholder="Start typing here..." bind:value={searchQuery} />
+		<button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+	</form>
+
 	<label for="page-limit">Records per page:</label>
-	<select name="page-limit">
+	<select name="page-limit" bind:value={selectedLimit} onchange={handleLimitChange}>
 		{#each PAGE_OPTIONS as option}
 			<option value={`${option}`}>{option}</option>
 		{/each}
@@ -39,6 +69,7 @@
 		padding: 9px 12px;
 		border-radius: 5px;
 		border: none;
+		margin-left: 8px;
 		cursor: pointer;
 		display: flex;
 		align-items: center;

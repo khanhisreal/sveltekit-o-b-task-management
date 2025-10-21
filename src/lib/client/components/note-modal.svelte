@@ -1,9 +1,22 @@
-<script>
+<script lang="ts">
 	import { fade } from 'svelte/transition';
+	import type { Note } from '../interfaces/interface';
 
-	const { handleHideModal, isAddNote, taskId } = $props();
+	const {
+		handleHideModal,
+		isAddNote,
+		taskId,
+		selectedNote = null
+	}: {
+		handleHideModal: () => void;
+		isAddNote: boolean;
+		taskId: string;
+		selectedNote?: Note | null;
+	} = $props();
 
-	console.log(taskId);
+	if (!isAddNote && selectedNote) {
+		console.log(`Selected note from task id = ${taskId}:`, selectedNote);
+	}
 
 	//get current date
 	const today = new Date();
@@ -21,8 +34,8 @@
 			<h3>
 				{#if isAddNote}
 					Add a note
-				{:else if !isAddNote}
-					Edit a note
+				{:else if selectedNote}
+					Edit note id {selectedNote.id}
 				{/if}
 			</h3>
 			<!-- svelte-ignore a11y_consider_explicit_label -->
@@ -32,8 +45,14 @@
 		</div>
 		<div class="form-content">
 			<form method="POST" action={isAddNote ? '?/add' : '?/update'}>
+				<input hidden type="text" name="id" value={selectedNote?.id} />
 				<input hidden type="text" name="task_id" value={taskId} />
-				<input hidden type="date" name="created_at" value={current_date} />
+				<input
+					hidden
+					type="date"
+					name="created_at"
+					value={isAddNote ? current_date : selectedNote?.created_at}
+				/>
 				<div>
 					<label for="content">Content:<span>*</span></label>
 					<textarea
@@ -42,13 +61,20 @@
 						placeholder="Add content for this note..."
 						rows="2"
 						required
+						value={selectedNote?.content ?? ''}
 					></textarea>
 				</div>
 				<div>
 					<label for="due_date">Due date:</label>
-					<input type="date" name="due_date" id="due_date" min={current_date} required />
+					<input
+						type="date"
+						name="due_date"
+						id="due_date"
+						min={current_date}
+						value={!isAddNote && selectedNote?.due_date}
+						required
+					/>
 				</div>
-
 				<div class="action-buttons">
 					<button type="button" class="cancel" onclick={handleHideModal}>Cancel</button>
 					<button type="submit" class="confirm">Confirm</button>
@@ -242,7 +268,7 @@
 		transform: scale(0.95);
 	}
 
-	.error {
+	/* .error {
 		color: #ff4545;
-	}
+	} */
 </style>

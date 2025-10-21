@@ -14,6 +14,10 @@
 
 	let toggleModal = $state(false);
 	let isAddNote = $state(true);
+	let currentNote = $state<Note | null>(null);
+
+	const currentPage = data.pagination!.page;
+	const currentLimit = data.pagination!.limit;
 
 	function handleShowModal() {
 		toggleModal = true;
@@ -25,10 +29,20 @@
 
 	function handleAddNote() {
 		isAddNote = true;
+		currentNote = null;
+		handleShowModal();
 	}
 
-	function handleEditNote() {
+	function handleEditNote(note: Note) {
+		currentNote = note;
 		isAddNote = false;
+		handleShowModal();
+	}
+
+	function goToPage(page: number) {
+		const url = new URL(window.location.href);
+		url.searchParams.set('page', String(page));
+		window.location.href = url.toString();
 	}
 
 	const backURL = localStorage.getItem(LOCAL_STORAGE_KEY) ?? '/';
@@ -50,10 +64,10 @@
 		><i class="fa-solid fa-arrow-left"></i> <span>Comeback to task list</span></a
 	>
 
-	<NoteTableActions {handleShowModal} {handleAddNote} />
+	<NoteTableActions {handleAddNote} {currentLimit} initialContent={data.content} />
 
 	{#if toggleModal}
-		<NoteModal {handleHideModal} {isAddNote} taskId={task?.id} />
+		<NoteModal {handleHideModal} {isAddNote} taskId={task!.id} selectedNote={currentNote} />
 	{/if}
 
 	{#if Array.isArray(notes) && notes!.length > 0}
@@ -81,8 +95,7 @@
 									<button
 										class="edit"
 										onclick={() => {
-											handleShowModal();
-											handleEditNote();
+											handleEditNote(note);
 										}}
 									>
 										<i class="fa-solid fa-pencil"></i>
@@ -110,9 +123,21 @@
 			</table>
 
 			<div class="pagination">
-				<button><i class="fa-solid fa-arrow-left"></i> Prev</button>
-				<span>Page 0 / 0</span>
-				<button>Next <i class="fa-solid fa-arrow-right"></i></button>
+				<button onclick={() => goToPage(currentPage - 1)} disabled={currentPage <= 1}>
+					<i class="fa-solid fa-arrow-left"></i> Prev
+				</button>
+
+				<span>
+					Page {data.pagination!.totalPages > 0 ? currentPage : 0}
+					/ {data.pagination!.totalPages}
+				</span>
+
+				<button
+					onclick={() => goToPage(currentPage + 1)}
+					disabled={currentPage >= data.pagination!.totalPages || data.pagination!.totalPages <= 1}
+				>
+					Next <i class="fa-solid fa-arrow-right"></i>
+				</button>
 			</div>
 		</div>
 	{:else}
