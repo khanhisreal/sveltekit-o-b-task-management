@@ -1,0 +1,30 @@
+import { writable } from 'svelte/store';
+import type { UserSettings } from '../interfaces/interface';
+
+const LOCAL_KEY = 'userSettings';
+
+function createUserSettings() {
+	let startValue: UserSettings = {
+		isDarkMode: false,
+		filterDefaultValue: 'All',
+		pageLimitDefaultValue: '5'
+	};
+
+	if (typeof localStorage !== 'undefined') {
+		const stored = localStorage.getItem(LOCAL_KEY);
+		if (stored) startValue = JSON.parse(stored);
+	}
+
+	const store = writable<UserSettings>(startValue);
+
+	store.subscribe((val) => {
+		if (typeof document !== 'undefined') {
+			document.cookie = `userSettings=${JSON.stringify(val)}; path=/; max-age=31536000`;
+			localStorage.setItem(LOCAL_KEY, JSON.stringify(val));
+		}
+	});
+
+	return store;
+}
+
+export const userSettings = createUserSettings();
